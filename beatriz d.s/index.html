@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Orçamentos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciamento de Orçamentos BTX</h1>
+        
+        <!-- Formulário para cadastrar novo orçamento -->
+        <h2>Novo Orçamento</h2>
+        <input type="text" id="nome-orcamento" placeholder="Nome do orçamento">
+        <textarea id="descricao-orcamento" placeholder="Descrição"></textarea>
+        <button onclick="cadastrarOrcamento()">Cadastrar Orçamento</button>
+
+        <!-- Lista de orçamentos cadastrados -->
+        <h2>Orçamentos Cadastrados</h2>
+        <div id="lista-orcamentos"></div>
+
+        <!-- Backup e Restauração -->
+        <h2>Backup e Restauração</h2>
+        <button onclick="fazerBackup()">Fazer Backup</button>
+        <button onclick="restaurarBackup()">Restaurar Backup</button>
+    </div>
+
+    <script src="scripts.js"></script>
+    <script>
+        // Função para cadastrar um novo orçamento
+        function cadastrarOrcamento() {
+            const nome = document.getElementById('nome-orcamento').value.trim();
+            const descricao = document.getElementById('descricao-orcamento').value.trim();
+
+            if (!nome) {
+                alert("Por favor, insira um nome para o orçamento.");
+                return;
+            }
+
+            const novoOrcamento = {
+                id: Date.now().toString(),
+                nome,
+                descricao,
+                dataHora: new Date().toLocaleString(),
+                itens: [],
+                total: 0
+            };
+
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+            orcamentos.push(novoOrcamento);
+            localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+
+            alert("Orçamento cadastrado com sucesso!");
+            carregarOrcamentos();
+            document.getElementById('nome-orcamento').value = '';
+            document.getElementById('descricao-orcamento').value = '';
+        }
+
+        // Função para carregar a lista de orçamentos
+        function carregarOrcamentos() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+            const lista = document.getElementById('lista-orcamentos');
+            lista.innerHTML = '';
+
+            orcamentos.forEach(orcamento => {
+                const div = document.createElement('div');
+                div.className = 'orcamento-item';
+                div.innerHTML = `
+                    <h3>${orcamento.nome}</h3>
+                    <p>${orcamento.descricao}</p>
+                    <p><strong>Data/Hora:</strong> ${orcamento.dataHora}</p>
+                    <button onclick="abrirItens('${orcamento.id}')">Abrir Itens</button>
+                    <button onclick="excluirOrcamento('${orcamento.id}')">Excluir</button>
+                `;
+                lista.appendChild(div);
+            });
+        }
+
+        // Função para abrir a tela de itens
+        function abrirItens(id) {
+            window.location.href = `itens.html?id=${id}`;
+        }
+
+        // Função para excluir um orçamento
+        function excluirOrcamento(id) {
+            const confirmacao = confirm("Tem certeza que deseja excluir este orçamento?");
+            if (!confirmacao) return;
+
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+            const novosOrcamentos = orcamentos.filter(o => o.id !== id);
+            localStorage.setItem('orcamentos', JSON.stringify(novosOrcamentos));
+            alert("Orçamento excluído com sucesso!");
+            carregarOrcamentos();
+        }
+
+        // Carregar orçamentos ao iniciar
+        carregarOrcamentos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Orçamento Simples</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #4B0082;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4B0082;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3A006B;
+        }
+        #lista-itens {
+            margin-top: 20px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistema de Orçamento</h1>
+        <input type="text" id="nome-item" placeholder="Nome do item">
+        <input type="number" id="preco-item" placeholder="Preço do item">
+        <button onclick="adicionarItem()">Adicionar Item</button>
+
+        <div id="lista-itens"></div>
+        <div class="total">Total: R$ <span id="total-orcamento">0.00</span></div>
+    </div>
+
+    <script>
+        let total = 0;
+
+        function adicionarItem() {
+            // Pegar os valores dos inputs
+            const nome = document.getElementById('nome-item').value;
+            const preco = parseFloat(document.getElementById('preco-item').value);
+
+            // Validar os valores
+            if (!nome || isNaN(preco)) {
+                alert("Por favor, preencha o nome e o preço corretamente.");
+                return;
+            }
+
+            // Atualizar o total
+            total += preco;
+            document.getElementById('total-orcamento').textContent = total.toFixed(2);
+
+            // Adicionar o item à lista
+            const lista = document.getElementById('lista-itens');
+            const novoItem = document.createElement('div');
+            novoItem.className = 'item';
+            novoItem.innerHTML = `
+                <span>${nome}</span>
+                <span>R$ ${preco.toFixed(2)}</span>
+            `;
+            lista.appendChild(novoItem);
+
+            // Limpar os inputs
+            document.getElementById('nome-item').value = '';
+            document.getElementById('preco-item').value = '';
+        }
+    </script>
+</body>
+</html>

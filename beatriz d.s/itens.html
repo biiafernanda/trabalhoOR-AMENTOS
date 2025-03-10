@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Itens</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho com o nome do orçamento -->
+        <h1>Itens do Orçamento: <span id="nome-orcamento-cabecalho"></span></h1>
+        
+        <!-- Formulário para adicionar item -->
+        <h2>Adicionar Item</h2>
+        <input type="text" id="nome-item" placeholder="Nome do item">
+        <input type="number" id="quantidade-item" placeholder="Quantidade" min="1">
+        <input type="number" id="preco-item" placeholder="Preço do item" min="0">
+        <button onclick="adicionarItem()">Adicionar Item</button>
+
+        <!-- Lista de itens -->
+        <h2>Itens do Orçamento</h2>
+        <table id="lista-itens">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Quantidade</th>
+                    <th>Preço Unitário</th>
+                    <th>Subtotal</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="total">Total: R$ <span id="total-orcamento">0.00</span></div>
+
+        <!-- Botões de funcionalidades -->
+        <button onclick="ordenarItensPorPreco()">Ordenar Itens por Preço</button>
+        <button onclick="exportarParaPDF()">Exportar para PDF</button>
+        <button onclick="window.location.href = 'index.html'">Voltar</button>
+    </div>
+
+    <!-- Modal para edição de itens -->
+    <div id="modal-edicao" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar-modal" onclick="fecharModal()">&times;</span>
+            <h2>Editar Item</h2>
+            <input type="text" id="editar-nome-item" placeholder="Nome do item">
+            <input type="number" id="editar-quantidade-item" placeholder="Quantidade" min="1">
+            <input type="number" id="editar-preco-item" placeholder="Preço do item" min="0">
+            <button onclick="salvarEdicaoItem()">Salvar</button>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+    <script>
+        let orcamentoAtual = null;
+        let itemEditando = null;
+
+        // Função para carregar o orçamento atual
+        function carregarOrcamento() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+            orcamentoAtual = orcamentos.find(o => o.id === id);
+
+            if (orcamentoAtual) {
+                // Exibir o nome do orçamento no cabeçalho
+                document.getElementById('nome-orcamento-cabecalho').textContent = orcamentoAtual.nome;
+                atualizarInterface();
+            } else {
+                alert("Orçamento não encontrado.");
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Função para adicionar item
+        function adicionarItem() {
+            const nome = document.getElementById('nome-item').value.trim();
+            const quantidade = parseInt(document.getElementById('quantidade-item').value);
+            const preco = parseFloat(document.getElementById('preco-item').value);
+
+            // Validações
+            if (!nome || isNaN(quantidade) || isNaN(preco)) {
+                alert("Por favor, preencha todos os campos corretamente.");
+                return;
+            }
+
+            if (quantidade <= 0 || preco < 0) {
+                alert("Quantidade e preço devem ser valores válidos.");
+                return;
+            }
+
+            // Verificar se o item já existe
+            const itemExistente = orcamentoAtual.itens.find(item => item.nome.toLowerCase() === nome.toLowerCase());
+            if (itemExistente) {
+                alert("Este item já foi adicionado ao orçamento.");
+                return;
+            }
+
+            // Adicionar item
+            const subtotal = quantidade * preco;
+            orcamentoAtual.itens.push({ nome, quantidade, preco });
+            orcamentoAtual.total += subtotal;
+
+            salvarOrcamento();
+            atualizarInterface();
+            limparCampos();
+        }
+
+        // Função para editar um item
+        function editarItem(nomeItem) {
+            itemEditando = orcamentoAtual.itens.find(item => item.nome === nomeItem);
+            if (itemEditando) {
+                document.getElementById('editar-nome-item').value = itemEditando.nome;
+                document.getElementById('editar-quantidade-item').value = itemEditando.quantidade;
+                document.getElementById('editar-preco-item').value = itemEditando.preco;
+                document.getElementById('modal-edicao').style.display = 'block';
+            }
+        }
+
+        // Função para excluir um item
+        function excluirItem(nomeItem) {
+            const confirmacao = confirm("Tem certeza que deseja excluir este item?");
+            if (!confirmacao) return;
+
+            const item = orcamentoAtual.itens.find(item => item.nome === nomeItem);
+            if (item) {
+                orcamentoAtual.itens = orcamentoAtual.itens.filter(item => item.nome !== nomeItem);
+                orcamentoAtual.total -= item.quantidade * item.preco;
+                salvarOrcamento();
+                atualizarInterface();
+            }
+        }
+
+        // Função para salvar a edição do item
+        function salvarEdicaoItem() {
+            const nome = document.getElementById('editar-nome-item').value.trim();
+            const quantidade = parseInt(document.getElementById('editar-quantidade-item').value);
+            const preco = parseFloat(document.getElementById('editar-preco-item').value);
+
+            // Validações
+            if (!nome || isNaN(quantidade) || isNaN(preco)) {
+                alert("Por favor, preencha todos os campos corretamente.");
+                return;
+            }
+
+            if (quantidade <= 0 || preco < 0) {
+                alert("Quantidade e preço devem ser valores válidos.");
+                return;
+            }
+
+            // Atualizar o item
+            itemEditando.nome = nome;
+            itemEditando.quantidade = quantidade;
+            itemEditando.preco = preco;
+
+            // Recalcular o total
+            orcamentoAtual.total = orcamentoAtual.itens.reduce((total, item) => total + item.quantidade * item.preco, 0);
+
+            salvarOrcamento();
+            atualizarInterface();
+            fecharModal();
+        }
+
+        // Função para fechar o modal
+        function fecharModal() {
+            document.getElementById('modal-edicao').style.display = 'none';
+        }
+
+        // Função para atualizar a interface
+        function atualizarInterface() {
+            const tbody = document.querySelector('#lista-itens tbody');
+            tbody.innerHTML = '';
+            orcamentoAtual.itens.forEach(item => {
+                const subtotal = item.quantidade * item.preco;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.nome}</td>
+                    <td>${item.quantidade}</td>
+                    <td>R$ ${item.preco.toFixed(2)}</td>
+                    <td>R$ ${subtotal.toFixed(2)}</td>
+                    <td>
+                        <button onclick="editarItem('${item.nome}')">Editar</button>
+                        <button onclick="excluirItem('${item.nome}')">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            document.getElementById('total-orcamento').textContent = orcamentoAtual.total.toFixed(2);
+        }
+
+        // Função para salvar o orçamento atualizado
+        function salvarOrcamento() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+            const index = orcamentos.findIndex(o => o.id === orcamentoAtual.id);
+            if (index !== -1) {
+                orcamentos[index] = orcamentoAtual;
+                localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+            }
+        }
+
+        // Função para limpar os campos
+        function limparCampos() {
+            document.getElementById('nome-item').value = '';
+            document.getElementById('quantidade-item').value = '';
+            document.getElementById('preco-item').value = '';
+        }
+
+        // Carregar orçamento ao iniciar
+        carregarOrcamento();
+    </script>
+</body>
+</html>
