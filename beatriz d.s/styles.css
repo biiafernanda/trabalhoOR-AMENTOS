@@ -16,7 +16,7 @@ body {
 }
 
 h1, h2, h3 {
-    color: #4B0082;
+    color: #140e18;
 }
 
 input, textarea, button, select {
@@ -30,7 +30,7 @@ input, textarea, button, select {
 }
 
 button {
-    background-color: #4B0082;
+    background-color: #6db67d;
     color: white;
     border: none;
     cursor: pointer;
@@ -38,7 +38,7 @@ button {
 }
 
 button:hover {
-    background-color: #3A006B;
+    background-color: #6db67d;
 }
 
 textarea {
@@ -110,7 +110,7 @@ textarea {
     font-weight: bold;
     margin-top: 20px;
     font-size: 18px;
-    color: #4B0082;
+    color: #070707;
 }
 
 /* Estilos do modal */

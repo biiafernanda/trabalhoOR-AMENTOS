@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Gerenciamento de Orçamentos BTX</h1>
+        <h1>Gerenciamento de Orçamentos: Trabalho Final</h1>
         
         <!-- Formulário para cadastrar novo orçamento -->
         <h2>Novo Orçamento</h2>
@@ -17,13 +17,13 @@
         <button onclick="cadastrarOrcamento()">Cadastrar Orçamento</button>
 
         <!-- Lista de orçamentos cadastrados -->
-        <h2>Orçamentos Cadastrados</h2>
+        <h2>Orçamentos Cadastrados!</h2>
         <div id="lista-orcamentos"></div>
 
         <!-- Backup e Restauração -->
         <h2>Backup e Restauração</h2>
-        <button onclick="fazerBackup()">Fazer Backup</button>
-        <button onclick="restaurarBackup()">Restaurar Backup</button>
+        <button onclick="fazerBackup()">Fazer Backup. Explicação: Caso precise fazer teste, salvar a modalidade antiga irá te ajudar, restaurar Backup! </button>
+        <button onclick="restaurarBackup()">Restaurar Backup. Explicação: Caso apague ou precise compartilhar, essa função irá te ajudar! </button>
     </div>
 
     <script src="scripts.js"></script>
@@ -70,8 +70,8 @@
                     <h3>${orcamento.nome}</h3>
                     <p>${orcamento.descricao}</p>
                     <p><strong>Data/Hora:</strong> ${orcamento.dataHora}</p>
-                    <button onclick="abrirItens('${orcamento.id}')">Abrir Itens</button>
-                    <button onclick="excluirOrcamento('${orcamento.id}')">Excluir</button>
+                    <button onclick="abrirItens('${orcamento.id}')">Abrir Itens. Explicação: Abrir todos os itens cadastrados </button>
+                    <button onclick="excluirOrcamento('${orcamento.id}')">Excluir. Explicação: Excluir toda a pasta </button>
                 `;
                 lista.appendChild(div);
             });
@@ -84,7 +84,7 @@
 
         // Função para excluir um orçamento
         function excluirOrcamento(id) {
-            const confirmacao = confirm("Tem certeza que deseja excluir este orçamento?");
+            const confirmacao = confirm("Tem certeza que deseja excluir este orçamento? Dica: Fez Backup antes de pagar?");
             if (!confirmacao) return;
 
             const orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
@@ -97,5 +97,8 @@
         // Carregar orçamentos ao iniciar
         carregarOrcamentos();
     </script>
+
+Obrigada! Grupo: Beatriz Aprigio , Melissa Ranny e Lucas Salvador! 
+
 </body>
 </html>
